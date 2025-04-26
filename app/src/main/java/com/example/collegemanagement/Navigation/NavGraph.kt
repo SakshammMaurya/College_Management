@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.collegemanagement.Admin.screens.AdminDashboard
+import com.example.collegemanagement.Admin.screens.AdminDashboard2
 import com.example.collegemanagement.Admin.screens.FacultyDetailScreen
 import com.example.collegemanagement.Admin.screens.ManageBanner
 import com.example.collegemanagement.Admin.screens.ManageCollegeInfo
@@ -60,6 +61,7 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
         }
 
         composable(Routes.AdminDashboard.route) {
+//            AdminDashboard2(navController)
             AdminDashboard(navController)
         }
         composable(Routes.ManageBanner.route) {

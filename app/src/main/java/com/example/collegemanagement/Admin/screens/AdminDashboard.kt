@@ -33,6 +33,7 @@ import com.example.collegemanagement.ui.TITLE_SIZE
 import com.example.collegemanagement.ui.theme.Purple80
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AdminDashboard(navController: NavController) {
 
@@ -113,4 +114,9 @@ fun AdminDashboard(navController: NavController) {
             }
         }
     )
+}
+
+@Composable
+fun AdminDashboard2(navController: NavController){
+
 }
