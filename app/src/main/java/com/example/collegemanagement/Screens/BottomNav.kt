@@ -3,6 +3,7 @@ package com.example.collegemanagement.Screens
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -13,6 +14,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItem
@@ -32,7 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHost
@@ -80,47 +84,88 @@ val authViewModel = AuthViewModel()
   R.drawable.contactus
  )
  )
+    val list2 = listOf(
+
+        BottomNavItem(
+            "Home",
+            R.drawable.home,
+            Routes.Home.route
+        ) ,
+        BottomNavItem(
+            "Faculty",
+            R.drawable.graduate,
+            Routes.Faculty.route
+        ),
+        BottomNavItem(
+            "Gallery",
+            R.drawable.gallery,
+            Routes.Gallery.route
+        ),
+        BottomNavItem(
+            "About us",
+            R.drawable.info,
+            Routes.AboutUs.route
+        )
+    )
 
  ModalNavigationDrawer(
   drawerState = drawerState,
   drawerContent = {
-  ModalDrawerSheet {
-   Image(painter = painterResource(id = R.drawable.image) ,
-    contentDescription = null,
-    modifier =Modifier.height(220.dp),
-    contentScale = ContentScale.Crop)
+      Column {
+          ModalDrawerSheet {
+              Column {
 
-   Divider()
-   Text(text = "")
 
-   list.forEachIndexed { index, items ->
-       NavigationDrawerItem(label = {
-        Text(text = items.title)
-       }, selected = index==selectedItemIndex, onClick = {
-         Toast.makeText(context,items.title,Toast.LENGTH_SHORT).show()
-        scope.launch {
-         drawerState.close()
-        }
-       },
-        icon = {
-        Icon(painter = painterResource(id = items.icon),
-         contentDescription = null,
-         modifier = Modifier.size(24.dp)
-         )
-       })
-   }
-      Button(onClick = {
-          authViewModel.logout {
-              navController.navigate(Routes.Login.route) {
-                  popUpTo(0) // Clear backstack
+                  Image(
+                      painter = painterResource(id = R.drawable.djlhc),
+                      contentDescription = null,
+                      modifier = Modifier.height(220.dp),
+                      contentScale = ContentScale.Crop
+                  )
+
+                  Text(
+                      text = "NIT Jamshedpur",
+                      fontSize = 28.sp,
+                      fontWeight = FontWeight.Bold,
+                      modifier = Modifier.padding(8.dp),
+                      style = MaterialTheme.typography.displayMedium
+                  )
+                  list.forEachIndexed { index, items ->
+                      NavigationDrawerItem(label = {
+                          Text(text = items.title)
+                      }, selected = index == selectedItemIndex, onClick = {
+                          scope.launch {
+                              drawerState.close()
+                          }
+                      },
+                          icon = {
+                              Icon(
+                                  painter = painterResource(id = items.icon),
+                                  contentDescription = null,
+                                  modifier = Modifier.size(24.dp)
+                              )
+                          })
+                  }
+                  Spacer(modifier = Modifier.height(250.dp))
+                  Button(
+                      onClick = {
+                          authViewModel.logout {
+                              navController.navigate(Routes.Login.route) {
+                                  popUpTo(0) // Clear backstack
+                              }
+                          }
+                      },
+                      modifier = Modifier
+                          .padding(16.dp)
+                          .align(Alignment.End)
+                  ) {
+                      Text(text = "Logout")
+
+                  }
               }
-          }
-      },
-          modifier = Modifier.padding(8.dp)) {
-          Text(text = "Logout")
 
+          }
       }
-  }
  },
    content = {
       Scaffold(

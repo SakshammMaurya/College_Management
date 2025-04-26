@@ -13,6 +13,7 @@ sealed class Routes(val route : String) {
     object Gallery:Routes("Gallery")
 
     object AdminDashboard:Routes("Admin_Dashboard")
+    object AdminDashboard2:Routes("Admin_Dashboard2")
     object ManageBanner:Routes("Manage_Banner")
     object ManageFaculty:Routes("Manage_Faculty")
     object ManageGallery:Routes("ManageGallery")

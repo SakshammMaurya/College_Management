@@ -85,17 +85,15 @@ dependencies {
 
     // pages and indicatiors
     implementation(libs.accompanist.pager)
-//    implementation(libs.accompanist.pager.indicators)
-//    implementation(libs.androidx.foundation.layout)
-//    implementation(libs.google.accompanist.pager)
-
-    //coil dependencies
-//    implementation(libs.coil.compose)
-//    implementation(libs.coil) // or whatever version you're using
-    //implementation(libs.coil.kt.coil.compose)
-//    implementation(libs.coil.gif) // optional, if you use GIFs
-
+    // coil dependencies
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    implementation(libs.ui)
+    implementation (libs.material3)
+    implementation (libs.ui.tooling.preview)
+    implementation(libs.material3)
+
+
 
 }
