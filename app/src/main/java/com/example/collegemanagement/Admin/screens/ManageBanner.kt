@@ -10,11 +10,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -28,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -49,16 +52,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import coil3.compose.rememberAsyncImagePainter
-import com.example.collegemanagement.ItemView.BannerItemView
 import com.example.collegemanagement.Models.BannerModel
 import com.example.collegemanagement.Utils.Constants.BANNER
 import com.example.collegemanagement.Viewmodel.BannerViewModel
-import com.example.collegemanagement.Viewmodel.NoticeViewModel
 import com.example.collegemanagement.Widget.LoadingDialog
-import com.example.collegemanagement.ui.theme.DeepBlue
-import com.example.collegemanagement.ui.theme.Purple80
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.ZoneId
+import java.util.Calendar
+import java.util.Date
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,6 +76,14 @@ fun ManageBanner(navController: NavController) {
     val isDeleted by bannerViewModel.isDeleted.observeAsState(false)
     val bannerList by bannerViewModel.bannerList.observeAsState(null)
     var selectedImage by remember { mutableStateOf<BannerModel?>(null) }
+
+    var isAutoExpire by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
+    var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
+
+
+
+    val expiryTime = remember { mutableStateOf<Long?>(null) }
 
     bannerViewModel.getBanner()
 
@@ -89,7 +101,9 @@ fun ManageBanner(navController: NavController) {
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
         imageUri = it
     }
-
+    LaunchedEffect(Unit) {
+        bannerViewModel.deleteExpiredBanners()
+    }
     LaunchedEffect(isUploaded) {
         showLoader.value=false
        if(isUploaded){
@@ -101,7 +115,9 @@ fun ManageBanner(navController: NavController) {
         if(isDeleted){
             Toast.makeText(context, "Image Deleted",Toast.LENGTH_SHORT).show()
         }
+
     }
+
 
     Scaffold(
         topBar = {
@@ -156,30 +172,69 @@ fun ManageBanner(navController: NavController) {
                             .height(600.dp)
                             .align(Alignment.CenterHorizontally)
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Button(
-                            onClick = {
-                                showLoader.value = true
-                                bannerViewModel.saveImage(imageUri!!)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(4.dp)
-                        ) {
-                            Text(text = "Add Image")
+                    Column(modifier = Modifier.padding(8.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            RadioButton(
+                                selected = isAutoExpire,
+                                onClick = { isAutoExpire = true }
+                            )
+                            Text("Auto Expire")
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            RadioButton(
+                                selected = !isAutoExpire,
+                                onClick = { isAutoExpire = false }
+                            )
+                            Text("Manual Delete")
                         }
-                        OutlinedButton(
-                            onClick = { imageUri = null },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .padding(4.dp)
+
+                        if (isAutoExpire) {
+                            DatePickerDialog(
+                                onDateSelected = { selectedDate = it },
+                                label = "Select Expiry Date"
+                            )
+                            TimePickerDialog(
+                                onTimeSelected = { selectedTime = it },
+                                label = "Select Expiry Time"
+                            )
+                        }
+
+                        Row(
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(text = "Cancel")
+                            Button(onClick = {
+                                showLoader.value = true
+
+                                val expiryTimestamp = if (isAutoExpire && selectedDate != null && selectedTime != null) {
+                                    val combinedDateTime = LocalDateTime.of(selectedDate, selectedTime)
+                                    com.google.firebase.Timestamp(
+                                        Date.from(
+                                            combinedDateTime.atZone(ZoneId.systemDefault()).toInstant()
+                                        )
+                                    )
+                                } else {
+                                    null
+                                }
+
+                                bannerViewModel.saveImage(imageUri!!, expiryTimestamp, isAutoExpire)
+//                                bannerViewModel.saveImage(imageUri!!, expiryTimestamp, true)
+                            },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .padding(4.dp)) {
+                                Text(text = "Add Image")
+                            }
+
+                            OutlinedButton(onClick = { imageUri = null },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .padding(4.dp)) {
+                                Text(text = "Cancel")
+                            }
                         }
                     }
                 }
@@ -262,3 +317,52 @@ fun FullScreenImageDialog(
         }
     )
 }
+
+@Composable
+fun DatePickerDialog(
+    onDateSelected: (LocalDate) -> Unit,
+    label: String
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val datePickerDialog = android.app.DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            onDateSelected(LocalDate.of(year, month + 1, dayOfMonth))
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    LaunchedEffect(true) {
+        datePickerDialog.setTitle(label)
+        datePickerDialog.show()
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    onTimeSelected: (LocalTime) -> Unit,
+    label: String
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    val timePickerDialog = android.app.TimePickerDialog(
+        context,
+        { _, hourOfDay, minute ->
+            onTimeSelected(LocalTime.of(hourOfDay, minute))
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true
+    )
+
+    LaunchedEffect(true) {
+        timePickerDialog.setTitle(label)
+        timePickerDialog.show()
+    }
+}
+

@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -174,7 +175,6 @@ fun AdminDashboard2(navController: NavController){
                                 modifier = Modifier.padding(16.dp).align(Alignment.End)
                             ) {
                                 Text(text = "Logout")
-
                             }
                         }
 
