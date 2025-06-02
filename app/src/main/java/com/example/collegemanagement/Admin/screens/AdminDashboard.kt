@@ -91,6 +91,7 @@ import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AdminDashboard2(navController: NavController){
     val authViewModel = AuthViewModel()
@@ -423,5 +424,10 @@ fun FeatureSection(
             }
         )
     }
+
+}
+
+@Composable
+fun AdminDashboard2(navController: NavController){
 
 }
