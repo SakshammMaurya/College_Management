@@ -1,12 +1,17 @@
 package com.example.collegemanagement.Screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
@@ -19,15 +24,21 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -49,6 +61,7 @@ import com.example.collegemanagement.Models.NavItems
 import com.example.collegemanagement.Navigation.Routes
 import com.example.collegemanagement.R
 import com.example.collegemanagement.Viewmodel.AuthViewModel
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,8 +76,32 @@ fun BottomNav(navController: NavController) {
  val selectedItemIndex by rememberSaveable {
          mutableIntStateOf(0)
  }
- 
+ var showProfileDialog by remember {
+     mutableStateOf(false)
+ }
 val authViewModel = AuthViewModel()
+
+    var name by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf("") }
+
+    // for cloud messaging (push notifications)
+    FirebaseMessaging.getInstance().subscribeToTopic("notices")
+        .addOnCompleteListener {
+            if (it.isSuccessful) {
+                Log.d("FCM", "Subscribed to notices topic")
+            }
+        }
+
+
+    LaunchedEffect(Unit) {
+        authViewModel.fetchUserProfile(
+            onResult = { fetchedName, fetchedNumber ->
+                name = fetchedName
+                number = fetchedNumber
+            },
+            onError = { error -> Log.e("Profile", error) }
+        )
+    }
 
  val list = listOf(
   NavItems(
@@ -115,7 +152,6 @@ val authViewModel = AuthViewModel()
           ModalDrawerSheet {
               Column {
 
-
                   Image(
                       painter = painterResource(id = R.drawable.djlhc),
                       contentDescription = null,
@@ -145,24 +181,7 @@ val authViewModel = AuthViewModel()
                                   modifier = Modifier.size(24.dp)
                               )
                           })
-                  }
-                  Spacer(modifier = Modifier.height(250.dp))
-                  Button(
-                      onClick = {
-                          authViewModel.logout {
-                              navController.navigate(Routes.Login.route) {
-                                  popUpTo(0) // Clear backstack
-                              }
-                          }
-                      },
-                      modifier = Modifier
-                          .padding(16.dp)
-                          .align(Alignment.End)
-                  ) {
-                      Text(text = "Logout")
-
-                  }
-              }
+                  } }
 
           }
       }
@@ -170,13 +189,26 @@ val authViewModel = AuthViewModel()
    content = {
       Scaffold(
        topBar = {
-        TopAppBar(title = { Text(text = "College App")},
+        TopAppBar(title = { Text(text = "National Institute of Technology Jamshedpur", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)},
          navigationIcon = {
           IconButton(onClick = { scope.launch { drawerState.open() } }) {
               Icon(painter = painterResource(id = R.drawable.menu), contentDescription =null,
                modifier = Modifier.size(24.dp))
           }
-         })
+         },
+            actions = {
+                IconButton(onClick = { showProfileDialog = true }) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(end = 4.dp)
+                    )
+                }
+            })
+
        },
           bottomBar = {
               MyBottomNav(navController = navController1)
@@ -202,6 +234,61 @@ val authViewModel = AuthViewModel()
           }
          
       }
+       if (showProfileDialog) {
+           AlertDialog(
+               onDismissRequest = { showProfileDialog = false },
+               title = { Text("Profile", textAlign = TextAlign.Center, fontSize = 22.sp, fontWeight = FontWeight.Medium) },
+               text = {
+                   Column(
+                       horizontalAlignment = Alignment.CenterHorizontally,
+                       verticalArrangement = Arrangement.Center
+                   ) {
+                       Text(
+                           text = "Name : ${name}",
+                           fontSize = 18.sp,
+                           fontWeight = FontWeight.Bold
+                           )
+                       Spacer(modifier = Modifier.height(8.dp))
+                       Text(
+                           text = "Number : ${number}",
+                           fontSize = 18.sp,
+                           fontWeight = FontWeight.Bold
+                           )
+                       OutlinedButton(
+                           onClick = {
+                               showProfileDialog = false
+                               authViewModel.logout {
+                                   navController.navigate(Routes.Login.route) {
+                                       popUpTo(0)
+                                   }
+                               }
+                           }) {
+                           Text(
+                               "Logout",
+                               textAlign = TextAlign.Center,
+                               color = Color.Red,
+                               fontSize = 16.sp,
+                               //fontWeight = FontWeight.Normal
+                           )
+                       }
+
+                       OutlinedButton(onClick = {
+                           showProfileDialog = false
+                           navController.navigate(Routes.ChangePassword.route)
+
+                       }) {
+                           Text("Change Password")
+                       }
+                   }
+               },
+               confirmButton = {},
+               dismissButton = {
+                   TextButton(onClick = { showProfileDialog = false }) {
+                       Text("Close")
+                   }
+               }
+           )
+       }
    }
 
  )

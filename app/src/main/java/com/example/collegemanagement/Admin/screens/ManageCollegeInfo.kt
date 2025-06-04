@@ -174,7 +174,7 @@ fun ManageCollegeInfo(navController: NavController) {
                     Image(painter = if(imageUrl!="") rememberAsyncImagePainter(model = imageUrl) else if(imageUri==null) painterResource(id = R.drawable.image)
                     else rememberAsyncImagePainter(model = imageUri),
                         contentDescription = NOTICE,
-                        contentScale = ContentScale.Fit,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .height(250.dp)
                             .align(Alignment.CenterHorizontally)

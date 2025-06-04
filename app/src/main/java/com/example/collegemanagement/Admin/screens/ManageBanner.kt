@@ -6,8 +6,10 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -44,9 +47,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle.Companion.Italic
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -57,12 +63,14 @@ import com.example.collegemanagement.Models.BannerModel
 import com.example.collegemanagement.Utils.Constants.BANNER
 import com.example.collegemanagement.Viewmodel.BannerViewModel
 import com.example.collegemanagement.Widget.LoadingDialog
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 @SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +88,7 @@ fun ManageBanner(navController: NavController) {
     var isAutoExpire by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var selectedTime by remember { mutableStateOf<LocalTime?>(null) }
-
+    val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
 
 
     val expiryTime = remember { mutableStateOf<Long?>(null) }
@@ -145,11 +153,11 @@ fun ManageBanner(navController: NavController) {
             FloatingActionButton(onClick = {
                 launcher.launch("image/*")
             },
-                containerColor = Color.White) {
+                containerColor = Color(0xFF7a7eb2)) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = null,
-                    tint = Color.Black
+                    tint = Color.White
                 )
             }
         }
@@ -167,9 +175,9 @@ fun ManageBanner(navController: NavController) {
                     Image(
                         painter = rememberAsyncImagePainter(model = imageUri),
                         contentDescription = BANNER,
-                        contentScale = ContentScale.Fit,
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .height(600.dp)
+                            .height(500.dp)
                             .align(Alignment.CenterHorizontally)
                     )
                     Column(modifier = Modifier.padding(8.dp)) {
@@ -241,23 +249,56 @@ fun ManageBanner(navController: NavController) {
 
             LazyColumn {
                 items(bannerList ?: emptyList()) { banner ->
-                    ElevatedCard(
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                selectedImage = banner  // <<< OPEN full view
-                            }
-                    ) {
+                    Box(modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            selectedImage = banner
+                        }
+                        .height(250.dp)
+                        .clip(RoundedCornerShape(12.dp))){
+
                         Image(
-                            painter = rememberAsyncImagePainter(model = banner.imageUrl),
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
+                        painter = rememberAsyncImagePainter(model = banner.imageUrl),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+
+                    )
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(250.dp)
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            Color(0xFF34364c).copy(alpha = 0.6f ),
+                                            Color(0xFF232433).copy(alpha = 0.9f ),
+//                                            Color.Black.copy(alpha = 0.8f)
+                                        ),
+
+                                    )
+
+                                )
+
                         )
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(12.dp)
+                        ) {
+
+                            Text(
+                                text =  banner.expiryTime?.toDate()?.let { "Expiry : ${formatter.format(it)}" } ?: "No Date Selected",
+                                color = Color.White.copy(alpha = 0.75f),
+                                fontSize = 12.sp,
+                                fontStyle = Italic
+                            )
+                        }
+
                     }
+
 
                 }
             }

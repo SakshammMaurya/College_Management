@@ -1,9 +1,11 @@
 package com.example.collegemanagement.Viewmodel
 
 import android.net.Uri
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.collegemanagement.Models.BannerModel
 import com.example.collegemanagement.Models.FacultyModel
 import com.example.collegemanagement.Models.NoticeModel
@@ -13,6 +15,8 @@ import com.example.collegemanagement.Utils.Constants.NOTICE
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class FacultyViewModel : ViewModel() {
@@ -32,6 +36,9 @@ class FacultyViewModel : ViewModel() {
 
     private val _facultyList = MutableLiveData<List<FacultyModel>>()
     val facultyList: LiveData<List<FacultyModel>> = _facultyList
+
+    private val _categoryTeacherCount = MutableLiveData<Map<String, Int>>()
+    val categoryTeacherCount: LiveData<Map<String, Int>> = _categoryTeacherCount
 
 
 
@@ -138,5 +145,60 @@ class FacultyViewModel : ViewModel() {
                 _isDeleted.postValue(false)
             }
     }
+
+    fun loadCategoryTeacherCounts() {
+        viewModelScope.launch {
+            val countMap = mutableMapOf<String, Int>()
+            val facultyCollection = Firebase.firestore.collection("faculty")
+
+            val categorySnapshots = facultyCollection.get().await()
+
+            categorySnapshots.documents.forEach { categoryDoc ->
+                val catName = categoryDoc.id // or categoryDoc.getString("catName") ?: return@forEach
+
+                val teacherSnapshot = facultyCollection
+                    .document(catName)
+                    .collection("teacher")
+                    .get()
+                    .await()
+
+                countMap[catName] = teacherSnapshot.size()
+            }
+
+            _categoryTeacherCount.value = countMap
+        }
+    }
+
+    fun deleteCategoryWithTeachers(catName: String, onComplete: () -> Unit) {
+        val db = Firebase.firestore
+        val categoryDoc = db.collection("faculty").document(catName)
+
+        // Delete all teachers
+        categoryDoc.collection("teacher").get()
+            .addOnSuccessListener { snapshot ->
+                val batch = db.batch()
+
+                snapshot.documents.forEach { doc ->
+                    batch.delete(doc.reference)
+                }
+
+                // Delete the category document itself
+                batch.delete(categoryDoc)
+
+                batch.commit()
+                    .addOnSuccessListener {
+                        Log.d("DeleteCategory", "Successfully deleted $catName and teachers.")
+                        onComplete()
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("DeleteCategory", "Failed to delete category: ", e)
+                    }
+            }
+            .addOnFailureListener { e ->
+                Log.e("DeleteTeachers", "Failed to fetch teachers: ", e)
+            }
+    }
+
+
 
 }

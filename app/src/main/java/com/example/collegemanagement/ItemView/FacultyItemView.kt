@@ -35,7 +35,7 @@ fun FacultyItemView(
     onClick:(catName:String)->Unit
      ){
 
-    OutlinedCard(
+    Card(
         modifier = Modifier.padding(4.dp).fillMaxWidth().clickable {
             onClick(catName)
         }

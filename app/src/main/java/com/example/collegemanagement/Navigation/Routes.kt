@@ -22,4 +22,5 @@ sealed class Routes(val route : String) {
     object FacultyDetailScreen:Routes("faculty_details/{catName}")
 
     object Login : Routes("Login")
+    object ChangePassword : Routes("ChangePassword")
 }

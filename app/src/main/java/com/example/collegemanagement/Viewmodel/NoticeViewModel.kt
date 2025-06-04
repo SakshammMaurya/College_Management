@@ -9,6 +9,7 @@ import com.example.collegemanagement.Models.NoticeModel
 import com.example.collegemanagement.Utils.Constants.BANNER
 import com.example.collegemanagement.Utils.Constants.NOTICE
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.util.UUID
@@ -46,11 +47,12 @@ class NoticeViewModel : ViewModel() {
 
     private fun uploadNotice(imageUrl: String, docId:String, title: String,link:String) {
 
-        val map = mutableMapOf<String,String>()
+        val map = mutableMapOf<String,Any>()
         map["imageUrl"] = imageUrl
         map["docId"] = docId
         map["title"] = title
         map["link"] = link
+        map["timestamp"] = FieldValue.serverTimestamp()
 
 
         noticeRef.document(docId).set(map)

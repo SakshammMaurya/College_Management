@@ -94,6 +94,7 @@ dependencies {
     implementation (libs.material3)
     implementation (libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation (libs.firebase.messaging)
 
 
 

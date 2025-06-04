@@ -6,7 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.collegemanagement.Admin.screens.AdminDashboard
+import com.example.collegemanagement.Admin.screens.AdminDashboard2
 import com.example.collegemanagement.Admin.screens.FacultyDetailScreen
 import com.example.collegemanagement.Admin.screens.ManageBanner
 import com.example.collegemanagement.Admin.screens.ManageCollegeInfo
@@ -15,6 +15,7 @@ import com.example.collegemanagement.Admin.screens.ManageGallery
 import com.example.collegemanagement.Admin.screens.ManageNotice
 import com.example.collegemanagement.Screens.AboutUs
 import com.example.collegemanagement.Screens.BottomNav
+import com.example.collegemanagement.Screens.ChangePasswordScreen
 import com.example.collegemanagement.Screens.Faculty
 import com.example.collegemanagement.Screens.Gallery
 import com.example.collegemanagement.Screens.Home
@@ -30,7 +31,7 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
     val startDestination = if (auth != null) {
         if (auth?.email == "sakshamm1124@gmail.com") {
             Constants.isAdmin = true
-            Routes.AdminDashboard.route
+            Routes.AdminDashboard2.route
         } else {
             Constants.isAdmin = false
             Routes.BottomNav.route
@@ -59,8 +60,8 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
             ManageNotice(navController)
         }
 
-        composable(Routes.AdminDashboard.route) {
-            AdminDashboard(navController)
+        composable(Routes.AdminDashboard2.route) {
+            AdminDashboard2(navController)
         }
         composable(Routes.ManageBanner.route) {
             ManageBanner(navController)
@@ -80,6 +81,12 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
         }
         composable(Routes.Login.route) {
             LoginScreen(navController, viewModel())
+        }
+        composable(Routes.ChangePassword.route) {
+            ChangePasswordScreen(
+                onPasswordChanged = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() }
+            )
         }
 
     }
