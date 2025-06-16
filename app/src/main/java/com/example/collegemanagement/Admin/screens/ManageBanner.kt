@@ -227,7 +227,6 @@ fun ManageBanner(navController: NavController) {
                                 }
 
                                 bannerViewModel.saveImage(imageUri!!, expiryTimestamp, isAutoExpire)
-//                                bannerViewModel.saveImage(imageUri!!, expiryTimestamp, true)
                             },
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -175,19 +175,6 @@ fun AdminDashboard2(navController: NavController){
                                         )
                                     })
                             }
-                            Spacer(modifier = Modifier.height(250.dp))
-                            Button(
-                                onClick = {
-                                    authViewModel.logout {
-                                        navController.navigate(Routes.Login.route) {
-                                            popUpTo(0) // Clear backstack
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.padding(16.dp).align(Alignment.End)
-                            ) {
-                                Text(text = "Logout")
-                            }
                         }
 
                 }
@@ -353,9 +340,6 @@ fun FeatureItem(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(10.dp))
             .background(feature.darkColor)
-
-
-
     ) {
         val width = constraints.maxWidth
         val height = constraints.maxHeight

@@ -29,21 +29,31 @@ class NoticeViewModel : ViewModel() {
     private val _noticeList = MutableLiveData<List<NoticeModel>>()
     val noticeList: LiveData<List<NoticeModel>> = _noticeList
 
+    private val _isUploading = MutableLiveData(false)
+    val isUploading: LiveData<Boolean> = _isUploading
 
-    fun saveNotice(uri: Uri, title:String, link:String){
+
+
+    fun saveNotice(uri: Uri, title: String, link: String) {
         _isPosted.postValue(false)
+        _isUploading.postValue(true)
+
         val randomUid = UUID.randomUUID().toString()
-
-        val imageRef = storageRef.child("$NOTICE/${randomUid}.jpg")
-
+        val imageRef = storageRef.child("$NOTICE/$randomUid.jpg")
         val uploadTask = imageRef.putFile(uri)
 
         uploadTask.addOnSuccessListener {
             imageRef.downloadUrl.addOnSuccessListener {
-                uploadNotice(it.toString(),randomUid, title, link)
+                uploadNotice(it.toString(), randomUid, title, link)
+                _isUploading.postValue(false)
+            }.addOnFailureListener {
+                _isUploading.postValue(false)
             }
+        }.addOnFailureListener {
+            _isUploading.postValue(false)
         }
     }
+
 
     private fun uploadNotice(imageUrl: String, docId:String, title: String,link:String) {
 

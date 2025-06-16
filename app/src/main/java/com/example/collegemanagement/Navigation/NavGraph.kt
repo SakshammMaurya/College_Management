@@ -1,6 +1,7 @@
 package com.example.collegemanagement.Navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -20,27 +21,35 @@ import com.example.collegemanagement.Screens.Faculty
 import com.example.collegemanagement.Screens.Gallery
 import com.example.collegemanagement.Screens.Home
 import com.example.collegemanagement.Screens.LoginScreen
+import com.example.collegemanagement.Screens.SplashScreen
 import com.example.collegemanagement.Utils.Constants
 import com.example.collegemanagement.Utils.Constants.isAdmin
 import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
+    LaunchedEffect(Routes.NavigationHandler.navigateToNotice.value) {
+        if (Routes.NavigationHandler.navigateToNotice.value) {
+            Routes.NavigationHandler.navigateToNotice.value = false
 
-    val auth = FirebaseAuth.getInstance().currentUser
-    val startDestination = if (auth != null) {
-        if (auth?.email == "sakshamm1124@gmail.com") {
-            Constants.isAdmin = true
-            Routes.AdminDashboard2.route
-        } else {
-            Constants.isAdmin = false
-            Routes.BottomNav.route
+            if (Constants.isAdmin) {
+                navController.navigate(Routes.ManageNotice.route) {
+                    popUpTo(Routes.Splash.route) { inclusive = true }
+                }
+            } else {
+                navController.navigate(Routes.Home.route) {
+                    popUpTo(Routes.Splash.route) { inclusive = true }
+                }
+            }
         }
-    } else {
-        Routes.Login.route
     }
 
-    NavHost(navController = navController, startDestination = startDestination) {
+    NavHost(navController = navController, startDestination = Routes.Splash.route) {
+
+        composable(Routes.Splash.route) {
+            SplashScreen(navController)
+        }
+
         composable(Routes.BottomNav.route) {
             BottomNav(navController)
         }
@@ -59,7 +68,6 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
         composable(Routes.ManageNotice.route) {
             ManageNotice(navController)
         }
-
         composable(Routes.AdminDashboard2.route) {
             AdminDashboard2(navController)
         }
@@ -77,7 +85,7 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
         }
         composable(Routes.FacultyDetailScreen.route) {
             val data = it.arguments!!.getString("catName")
-            FacultyDetailScreen(navController,data!!)
+            FacultyDetailScreen(navController, data!!)
         }
         composable(Routes.Login.route) {
             LoginScreen(navController, viewModel())
@@ -88,7 +96,5 @@ fun NavGraph(modifier: Modifier = Modifier, navController: NavHostController) {
                 onCancel = { navController.popBackStack() }
             )
         }
-
     }
-
 }

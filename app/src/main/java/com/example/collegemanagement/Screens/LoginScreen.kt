@@ -140,7 +140,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel) {
                         viewModel.login(email, password,
                             onSuccess = {
                                 val route =
-                                    if (Constants.isAdmin) Routes.AdminDashboard.route else Routes.BottomNav.route
+                                    if (Constants.isAdmin) Routes.AdminDashboard2.route else Routes.BottomNav.route
                                 navController.navigate(route) {
                                     popUpTo(Routes.Login.route) { inclusive = true }
                                 }
@@ -157,7 +157,7 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel) {
                         viewModel.signup(email, password, name, number,
                             onSuccess = {
                                 val route =
-                                    if (Constants.isAdmin) Routes.AdminDashboard.route else Routes.BottomNav.route
+                                    if (Constants.isAdmin) Routes.AdminDashboard2.route else Routes.BottomNav.route
                                 navController.navigate(route) {
                                     popUpTo(Routes.Login.route) { inclusive = true }
                                 }
@@ -170,8 +170,8 @@ fun LoginScreen(navController: NavController, viewModel: AuthViewModel) {
                 onForgotPassword = { showDialog = true },
                 onForgotEmailChange = { forgotEmail = it },
                 onDismissDialog = { showDialog = false },
-                onNameChange = {email =it},
-                onNumberChange = {password = it},
+                onNameChange = {name =it},
+                onNumberChange = {number = it},
                 onEmailChange = {email = it},
                 onPasswordChange = {password = it}
             )

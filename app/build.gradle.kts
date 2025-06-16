@@ -96,6 +96,9 @@ dependencies {
     implementation(libs.material3)
     implementation (libs.firebase.messaging)
 
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+
 
 
 }
