@@ -174,4 +174,3 @@ College Management App/
 
 ---
 
-> 📌 *This project was built to learn full-stack Android development, integrate real-time backend services, and implement clean architecture in a scalable college app.*
